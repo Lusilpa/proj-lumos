@@ -39,3 +39,10 @@ export interface Documento {
   data_ultima_atualizacao: string;
   fileUrl?: string; // Para o protótipo de leitura de PDF
 }
+
+export interface Empresa {
+  id: string;
+  nome: string;
+  cnpj: string;
+  quantidade_filiais: number;
+}

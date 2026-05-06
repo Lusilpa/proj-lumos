@@ -13,7 +13,7 @@ export default function AgentePage() {
 
   // Filtra apenas o que o usuário tem acesso (Motor ABAC)
   const acessiveis = MOCK_DOCS.filter((doc) =>
-    checkAccess(doc.regra_acesso, CURRENT_MOCK_USER, doc.cargos_permitidos)
+    checkAccess(doc, CURRENT_MOCK_USER)
   );
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export default function AgentePage() {
     setChatMessages([
       {
         role: 'ai',
-        text: `Olá, ${CURRENT_MOCK_USER.nome}! Sou o Agente Lumos.\n\nFui configurado com conceitos de Algebra Booleana para responder perguntas *exclusivamente* sobre os ${acessiveis.length} documentos aos quais o cargo de ${CURRENT_MOCK_USER.cargo} (${CURRENT_MOCK_USER.departamento}) tem permissão de leitura.\n\nComo posso ajudar hoje?`
+        text: `Olá, ${CURRENT_MOCK_USER.nome}! Sou o Agente Lumos.\n\nFui configurado com conceitos de Algebra Booleana para responder perguntas exclusivamente sobre os ${acessiveis.length} documentos aos quais o cargo de ${CURRENT_MOCK_USER.cargo} (${CURRENT_MOCK_USER.departamento}) tem permissão de leitura.\n\nComo posso ajudar hoje?`
       }
     ]);
   }, [acessiveis.length]);
@@ -77,8 +77,8 @@ export default function AgentePage() {
           {chatMessages.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] rounded-2xl px-6 py-4 text-sm shadow-md ${msg.role === 'user'
-                  ? 'bg-brand-100 text-brand-900 rounded-tr-none font-bold'
-                  : 'bg-brand-900 border border-brand-500/40 text-brand-100 rounded-tl-none whitespace-pre-wrap leading-relaxed'
+                ? 'bg-brand-100 text-brand-900 rounded-tr-none font-bold'
+                : 'bg-brand-900 border border-brand-500/40 text-brand-100 rounded-tl-none whitespace-pre-wrap leading-relaxed'
                 }`}>
                 {msg.text}
               </div>
