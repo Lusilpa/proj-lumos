@@ -85,4 +85,4 @@ npm run dev
 4.  **Autenticação JWT/Session:** Proteger rigorosamente as rotas `/api/` para aceitarem requisições apenas de usuários com `Session` válida e cargo autorizado ao Painel Admin.
 
 ---
-**Documento mantido e auditado pela Direção Executiva (Jonas - Presidente/Arquiteto-Chefe).**
+**Documento mantido e auditado por estudantes do Instituto de Ensino Superior Fucapi.**
