@@ -1,0 +1,123 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Search, Network, Plus, X, Loader2, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
+import { CadastroGeralCargosPage } from "../components/Register/Cargos";
+import { TableCargos } from "../components/Table/Cargos";
+import { ToolsCargos } from "../components/Tools/Cargos";
+import { cargoService } from "@/lib/services/cargos.service";
+
+interface CargoItem {
+  id: string;
+  nome: string;       
+  slug: string;       
+  nivel: string;      
+  setor_slug: string; 
+}
+
+export default function CargosAdminPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSetorFilter, setSelectedSetorFilter] = useState("");
+  const [localCargos, setLocalCargos] = useState<CargoItem[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({ nome: "", setor_slug: "", nivel: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const data = await cargoService.getCargos();
+        setLocalCargos(data);
+      } catch (error) {
+        console.error("Erro ao buscar cargos:", error);
+        toast.error("Erro ao carregar cargos.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  const handleCreateCargo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const slug = formData.nome.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      const newCargoId = await cargoService.createCargo({
+        nome: formData.nome,
+        slug,
+        nivel: formData.nivel,
+        setor_slug: formData.setor_slug,
+      });
+
+      const newCargo: CargoItem = {
+        id: newCargoId,
+        nome: formData.nome,
+        slug,
+        nivel: formData.nivel,
+        setor_slug: formData.setor_slug,
+      };
+
+      setLocalCargos([...localCargos, newCargo]);
+      setIsModalOpen(false);
+      setFormData({ nome: "", setor_slug: "", nivel: "" });
+      toast.success("Cargo cadastrado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao criar cargo:", error);
+      toast.error("Erro ao cadastrar cargo.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const cargosExibidos = localCargos.filter((cargo) => {
+    const matchBusca = cargo.nome.toLowerCase().includes(searchQuery.toLowerCase()) || cargo.slug.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSetor = selectedSetorFilter ? cargo.setor_slug === selectedSetorFilter : true;
+    return matchBusca && matchSetor;
+  });
+
+  return (
+    <div className="max-w-6xl mx-auto flex flex-col h-full relative">
+
+      {/* Cabeçalho */}
+      <div className="flex flex-col gap-2 mb-8">
+        <div className="flex items-center gap-3">
+          <Network className="w-8 h-8 text-brand-100" />
+          <h1 className="text-3xl font-black tracking-tight text-brand-100 uppercase">Gestão de Cargos</h1>
+        </div>
+        <p className="text-brand-300 font-medium">
+          Cadastro e estruturação da hierarquia organizacional
+        </p>
+      </div>
+
+      {/* Ferramentas extraídas */}
+      <ToolsCargos 
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        selectedSetorFilter={selectedSetorFilter}
+        setSelectedSetorFilter={setSelectedSetorFilter}
+        setIsModalOpen={setIsModalOpen}
+      />      
+      
+      {/* Tabela de Cargos */}
+      {isLoading ? (
+        <div className="flex justify-center p-8"><span className="text-brand-300">Carregando...</span></div>
+      ) : (
+        <TableCargos cargosExibidos={cargosExibidos} />
+      )}
+
+      {/* Modal de Cadastro */}
+      <CadastroGeralCargosPage
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        formData={formData}
+        setFormData={setFormData}
+        handleCreateCargo={handleCreateCargo}
+        isSubmitting={isSubmitting}
+      />
+    </div>
+  );
+}

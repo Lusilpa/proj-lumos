@@ -1,0 +1,91 @@
+import { Lock, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
+
+export function TableDocs({ docsExibidos }: { docsExibidos: any[] }) {
+    return (
+        <div className="bg-brand-800/40 rounded-3xl border border-brand-500/20 overflow-hidden shadow-2xl backdrop-blur-xl flex-1">
+            <div className="overflow-x-auto h-full min-h-[300px]">
+                <table className="w-full text-left border-collapse">
+                    <thead className="bg-brand-900/80 sticky top-0 z-10 backdrop-blur-md">
+                        <tr>
+                            <th className="py-5 px-6 border-b border-brand-500/30 text-xs font-black text-brand-300 uppercase tracking-widest">
+                                Identificação do Documento
+                            </th>
+                            <th className="py-5 px-6 border-b border-brand-500/30 text-xs font-black text-brand-300 uppercase tracking-widest w-1/3">
+                                Motor Lógico (ABAC)
+                            </th>
+                            <th className="py-5 px-6 border-b border-brand-500/30 text-xs font-black text-brand-300 uppercase tracking-widest text-right">
+                                Ações
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-brand-500/10">
+                        {docsExibidos.length === 0 ? (
+                            <tr>
+                                <td colSpan={3} className="py-12 text-center text-brand-400 font-medium">
+                                    Nenhum documento encontrado.
+                                </td>
+                            </tr>
+                        ) : (
+                            docsExibidos.map((doc) => (
+                                <tr
+                                    key={doc.id}
+                                    className="hover:bg-brand-800/80 transition-all duration-200 group"
+                                >
+                                    <td className="py-4 px-6 align-top">
+                                        <div className="flex flex-col gap-1">
+                                            <span className="font-bold text-brand-100 text-sm">{doc.nome}</span>
+                                            <span className="text-xs text-brand-300 mb-2">{doc.descricao}</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] text-brand-400 font-medium tracking-wider uppercase">ID: {doc.id}</span>
+                                                <span className="text-[10px] text-brand-500">•</span>
+                                                <span className="text-[10px] text-brand-400 font-medium tracking-wider uppercase">Atualizado: {doc.data_ultima_atualizacao}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td className="py-4 px-6 align-top bg-brand-900/20">
+                                        <div className="flex flex-col gap-3">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black bg-brand-900 border border-brand-500/40 text-brand-100 uppercase tracking-widest">
+                                                    {doc.departamento_alvo}
+                                                </div>
+                                                {doc.cargos_permitidos.map((c: string) => (
+                                                    <div key={c} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black bg-brand-100 text-brand-900 uppercase tracking-widest">
+                                                        {c}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="flex gap-2 p-2 bg-brand-900 rounded-lg border border-brand-500/30 shadow-inner">
+                                                <Lock className="w-3 h-3 text-brand-400 shrink-0 mt-0.5" />
+                                                <code className="text-[10px] font-mono text-brand-300 break-all">
+                                                    {doc.regra_acesso || "Sem regra definida"}
+                                                </code>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td className="py-4 px-6 align-top text-right">
+                                        <div className="relative group/dropdown inline-block">
+                                            <button className="p-2 hover:bg-brand-500/20 rounded-lg text-brand-400 hover:text-brand-100 transition-colors">
+                                                <MoreVertical className="w-5 h-5" />
+                                            </button>
+                                            <div className="absolute right-0 top-full mt-1 hidden group-hover/dropdown:flex flex-col bg-brand-900 border border-brand-500/30 rounded-xl shadow-2xl z-50 w-36 overflow-hidden">
+                                                <button onClick={() => toast('Função de edição em desenvolvimento', { icon: '🚧' })} className="flex items-center gap-2 px-4 py-3 text-xs font-bold text-brand-100 hover:bg-brand-800 transition-colors text-left w-full">
+                                                    <Pencil className="w-4 h-4" /> Editar
+                                                </button>
+                                                <button onClick={() => toast('Função de exclusão em desenvolvimento', { icon: '🚧' })} className="flex items-center gap-2 px-4 py-3 text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors text-left w-full border-t border-brand-500/20">
+                                                    <Trash2 className="w-4 h-4" /> Excluir
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+}
