@@ -27,6 +27,8 @@ export interface User {
   email: string;
   departamento: Departamento | string;
   cargo: Cargo | string;
+  senha?: string;           // Senha atual (email na criação, definida pelo usuário após 1º acesso)
+  primeiro_acesso?: boolean; // true = usuário nunca trocou a senha
 }
 
 export interface Documento {

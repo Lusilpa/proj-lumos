@@ -31,8 +31,11 @@ const parser = new Parser({
  * @param user Os atributos do usuário logado (contexto da requisição).
  * @returns {boolean} true se o acesso for concedido, false caso contrário.
  */
-export function checkAccess(documento: Documento, user: User): boolean {
+export function checkAccess(documento: Documento, user: User | null | undefined): boolean {
   try {
+    // Guarda de Segurança: usuário nulo = acesso negado (Fail-Safe)
+    if (!user || !user.departamento || !user.cargo) return false;
+
     // 1. Fallback de Segurança: Regra de Intersecção Básica
     // Se o documento não tiver uma regra booleana estrita definida, 
     // avaliamos se o departamento e o cargo batem exatamente com as permissões.

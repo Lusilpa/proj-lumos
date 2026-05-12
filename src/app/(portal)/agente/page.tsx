@@ -1,27 +1,33 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CURRENT_MOCK_USER } from "@/data/mockUsers";
-import { MOCK_DOCS } from "@/data/mockDocs";
+import { useAuth } from "@/contexts/AuthContext";
+import { documentoService } from "@/lib/services/documentos.service";
 import { checkAccess } from "@/lib/abac/engine";
 import { Bot, Send, Loader2, ShieldCheck } from "lucide-react";
+import type { Documento } from "@/types";
 
 export default function AgentePage() {
+  const { user } = useAuth();
+  const [docs, setDocs] = useState<Documento[]>([]);
   const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'ai', text: string }[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
 
+  // Carrega documentos do Firebase
+  useEffect(() => {
+    documentoService.getDocumentos().then(setDocs);
+  }, []);
+
   // Filtra apenas o que o usuário tem acesso (Motor ABAC)
-  const acessiveis = MOCK_DOCS.filter((doc) =>
-    checkAccess(doc, CURRENT_MOCK_USER)
-  );
+  const acessiveis = user ? docs.filter((doc) => checkAccess(doc, user)) : [];
 
   useEffect(() => {
     // Initial welcome message
     setChatMessages([
       {
         role: 'ai',
-        text: `Olá, ${CURRENT_MOCK_USER.nome}! Sou o Agente Lumos.\n\nFui configurado com conceitos de Algebra Booleana para responder perguntas exclusivamente sobre os ${acessiveis.length} documentos aos quais o cargo de ${CURRENT_MOCK_USER.cargo} (${CURRENT_MOCK_USER.departamento}) tem permissão de leitura.\n\nComo posso ajudar hoje?`
+        text: `Olá, ${user?.nome}! Sou o Agente Lumos.\n\nFui configurado com conceitos de Algebra Booleana para responder perguntas exclusivamente sobre os ${acessiveis.length} documentos aos quais o cargo de ${user?.cargo} (${user?.departamento}) tem permissão de leitura.\n\nComo posso ajudar hoje?`
       }
     ]);
   }, [acessiveis.length]);
@@ -42,9 +48,9 @@ export default function AgentePage() {
         body: JSON.stringify({
           prompt: userMsg,
           acessiveisContext: acessiveis,
-          userName: CURRENT_MOCK_USER.nome,
-          userRole: CURRENT_MOCK_USER.cargo,
-          userDept: CURRENT_MOCK_USER.departamento
+          userName: user?.nome,
+          userRole: user?.cargo,
+          userDept: user?.departamento
         }),
       });
       const data = await res.json();

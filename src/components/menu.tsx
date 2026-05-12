@@ -1,19 +1,18 @@
-"use client";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CURRENT_MOCK_USER } from "@/data/mockUsers";
+import { useAuth } from "@/contexts/AuthContext";
 import { LayoutGrid, Bot, Users, Briefcase, Network, FileSignature } from "lucide-react";
 
 export function Menu() {
     const pathname = usePathname();
+    const { user } = useAuth();
 
     const cargosPermitidosAdmin = ["auxiliar", "analista", "gerente", "supervisor"];
     const departamentosPermitidosAdmin = ["rh", "dp", "ti"];
 
     const isUserAdmin =
-        cargosPermitidosAdmin.includes(CURRENT_MOCK_USER.cargo) &&
-        departamentosPermitidosAdmin.includes(CURRENT_MOCK_USER.departamento);
+        cargosPermitidosAdmin.includes(user?.cargo ?? '') &&
+        departamentosPermitidosAdmin.includes(user?.departamento ?? '');
 
     return (
         <div>

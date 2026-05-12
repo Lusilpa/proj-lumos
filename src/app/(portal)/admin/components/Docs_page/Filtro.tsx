@@ -1,5 +1,7 @@
+"use client";
+
 import { Search } from "lucide-react";
-import { CURRENT_MOCK_USER } from "@/data/mockUsers";
+import { useAuth } from "@/contexts/AuthContext";
 import { MOCK_SETORES } from "@/data/mockSetores";
 
 interface FiltroAgenteProps {
@@ -10,13 +12,14 @@ interface FiltroAgenteProps {
 }
 
 export function FiltroAgente({ search, setSearch, setorFilter, setSetorFilter }: FiltroAgenteProps) {
+    const { user } = useAuth();
     return (
         <>
             {/* Cabeçalho da Página */}
             <div className="flex flex-col gap-2 mb-8">
                 <h1 className="text-3xl font-bold tracking-tight text-brand-100">Meus Documentos Liberados</h1>
                 <p className="text-brand-400">
-                    Exibindo protocolos permitidos para <strong className="text-brand-400 brightness-150">{CURRENT_MOCK_USER.cargo}</strong> do departamento de <strong className="text-brand-400 brightness-150">{CURRENT_MOCK_USER.departamento}</strong>.
+                    Exibindo protocolos permitidos para <strong className="text-brand-400 brightness-150">{user?.cargo}</strong> do departamento de <strong className="text-brand-400 brightness-150">{user?.departamento}</strong>.
                 </p>
             </div>
 

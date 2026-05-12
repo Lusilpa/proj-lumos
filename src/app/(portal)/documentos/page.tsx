@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { CURRENT_MOCK_USER } from "@/data/mockUsers";
-import { MOCK_DOCS } from "@/data/mockDocs";
-import { MOCK_SETORES } from "@/data/mockSetores";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { checkAccess } from "@/lib/abac/engine";
 import { Search, FileText, Lock, X, ExternalLink, Bot, Send, Loader2 } from "lucide-react";
 import { DocumentCard } from "@/components/DocumentCard";
@@ -11,11 +9,16 @@ import type { Documento } from "@/types";
 import { FiltroAgente } from "../admin/components/Docs_page/Filtro";
 import { Agent } from "../admin/components/Docs_page/Agente";
 import { Visualizador_pdf } from "../admin/components/Docs_page/Visualizador_pdf";
+import { documentoService } from "@/lib/services/documentos.service";
+import { GridCards } from "../admin/components/Docs_page/GridCards";
 
 export default function DocumentosPage() {
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [docModal, setDocModal] = useState<Documento | null>(null);
   const [setorFilter, setSetorFilter] = useState("Todos");
+  const [localDocs, setLocalDocs] = useState<Documento[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Estados do Chat IA
   const [chatDoc, setChatDoc] = useState<Documento | null>(null);
@@ -23,6 +26,19 @@ export default function DocumentosPage() {
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
 
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const data = await documentoService.getDocumentos();
+        setLocalDocs(data);
+      } catch (error) {
+        console.error("Erro ao buscar documentos:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, []);
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatInput.trim() || !chatDoc) return;
@@ -49,8 +65,8 @@ export default function DocumentosPage() {
     }
   };
 
-  // Filtro ABAC
-  const acessiveis = MOCK_DOCS.filter((doc) => checkAccess(doc, CURRENT_MOCK_USER));
+  // Filtro ABAC — só executa se o usuário já foi hidratado pelo contexto
+  const acessiveis = user ? localDocs.filter((doc) => checkAccess(doc, user)) : [];
 
   // Filtro de Busca Local e Setor
   const exibidos = acessiveis.filter((doc) => {
@@ -71,6 +87,16 @@ export default function DocumentosPage() {
       />
 
       {/* Grid de Cards */}
+      {isLoading ? (
+        <div className="flex justify-center p-8"><span className="text-brand-300">Carregando documentos...</span></div>
+      ) : (
+        <GridCards 
+          exibidos={exibidos} 
+          setDocModal={setDocModal} 
+          setChatDoc={setChatDoc} 
+          setChatMessages={setChatMessages} 
+        />
+      )}
 
 
       {/* ========================================================= */}
